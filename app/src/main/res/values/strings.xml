@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">PopularMovies</string>
+    <string name="no_internet_info">You dont have an internet connection.\nPlease connect to the internet to load movies.</string>
+    <string name="uknwn_error">Sorry, there has been some unexpected error.</string>
+    <string name="plot_summary">Plot Summary:</string>
+    <string name="vote_average">Vote Average:</string>
+    <string name="release_date">Release Date:</string>
+    <string name="uknown">Unknown</string>
+    <string-array name="spinner_sort">
+        <item>Sort by Popularity</item>
+        <item>Sort by Rating</item>
+    </string-array>
+</resources>
