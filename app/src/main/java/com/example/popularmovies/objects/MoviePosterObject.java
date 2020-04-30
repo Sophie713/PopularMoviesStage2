@@ -7,6 +7,11 @@ public class MoviePosterObject implements Parcelable {
     String imgUrl;
     String movieId;
 
+    /**
+     * parcelable movie object with image and movie id
+     * @param imgUrl
+     * @param movieId
+     */
     public MoviePosterObject(String imgUrl, String movieId) {
         this.imgUrl = imgUrl;
         this.movieId = movieId;

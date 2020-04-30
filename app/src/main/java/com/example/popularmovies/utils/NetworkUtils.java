@@ -9,6 +9,11 @@ import java.util.Scanner;
 
 public class NetworkUtils {
 
+    /**
+     * Main AsyncTask that calls the server and gets the data and then passes them to the activity through responseReciever innterface
+     * @param url recieves URL it should get the response from
+     * @param responseReciever interface to pass the data do the activity
+     */
     public static void getServerResponse(URL url, final GeneralUtils.ResponseReciever responseReciever) {
         new AsyncTask<URL, Void, String>() {
             String response = "";
@@ -32,7 +37,12 @@ public class NetworkUtils {
         }.execute(url);
     }
 
-    public static String getJson(URL url) {
+    /**
+     * JSON response from the server in a form of a String
+     * @param url
+     * @return
+     */
+    private static String getJson(URL url) {
         String json = "";
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();

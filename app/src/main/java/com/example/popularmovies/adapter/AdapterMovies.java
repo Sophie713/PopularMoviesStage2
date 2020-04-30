@@ -44,8 +44,10 @@ public class AdapterMovies extends RecyclerView.Adapter<HolderMovie> {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //check I am online to download data
                 if (GeneralUtils.isOnline(context)) {
                     Intent intent = new Intent(context, MovieDetail.class);
+                    //pass movie id as an identifier so that I can download the movie details
                     intent.putExtra(Const.movieId, movies.get(positionF).getMovieId());
                     context.startActivity(intent);
                 } else {
@@ -53,6 +55,7 @@ public class AdapterMovies extends RecyclerView.Adapter<HolderMovie> {
                 }
             }
         });
+        //display movie poster or placeholder
         Picasso.with(context).load(new UrlBuilderTools().buildUrlForPoster(movies.get(position).getImgUrl())).placeholder(R.drawable.unnamed).into(holder.image);
     }
 

@@ -20,6 +20,11 @@ public class ParserUtil {
     private static final String VOTE_AVRG = "vote_average";
     private static final String PLOT = "overview";
 
+    /**
+     * takes JSON of movies and returns list of objects with movie id and porter url
+     * @param json takes JSON of movies
+     * @return list of objects with movie id and porter url
+     */
     public static ArrayList<MoviePosterObject> moviePosterObjects(String json) {
         ArrayList<MoviePosterObject> posterUrls = new ArrayList<>();
         try {
@@ -37,6 +42,11 @@ public class ParserUtil {
         return posterUrls;
     }
 
+    /**
+     * takes JSON of a movie and returns the movie details
+     * @param json JSON of movie details
+     * @return object with movie poster, title, release date, votes and plot
+     */
     public static MovieDetailObject movieDetails(String json) {
         MovieDetailObject movieDetails = null;
         try {

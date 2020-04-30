@@ -20,7 +20,5 @@ public class HolderMovie extends RecyclerView.ViewHolder {
         super(itemView);
         image = itemView.findViewById(R.id.item_movie_image);
         card = itemView.findViewById(R.id.item_movie_card);
-        // todo on Click intent
-        // xyz Picasso.with(image.getContext()).load("http://i.imgur.com/DvpvklR.png").into(image);
     }
 }

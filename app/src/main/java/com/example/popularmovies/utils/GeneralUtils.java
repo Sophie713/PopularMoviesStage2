@@ -9,6 +9,11 @@ import com.example.popularmovies.MainActivity;
 import com.example.popularmovies.R;
 
 public class GeneralUtils {
+    /**
+     * tests if the devise is online
+     * @param context
+     * @return true if it is online false if there is an error or is offline
+     */
     public static boolean isOnline(Context context) {
         //I used android documentation to write this part of code
         try {
@@ -21,14 +26,25 @@ public class GeneralUtils {
         }
     }
 
+    /**
+     * Toast message for no connection
+     * @param context
+     */
     public static void noConnectionToast(Context context) {
         Toast.makeText(context, R.string.no_internet_info, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * toast message for general error
+     * @param context
+     */
     public static void someProblemToast(Context context) {
         Toast.makeText(context, R.string.uknwn_error, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * interface to recieve asynchronous data
+     */
     public interface ResponseReciever {
         public void responseRecieved(String response);
     }

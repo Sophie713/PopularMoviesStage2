@@ -5,8 +5,6 @@ import android.util.Log;
 
 public class UrlBuilderTools {
 
-    private static String MOVIE_DB_API_KEY = "e7afd50f939fdba0f7e1c6c15efa654a";
-
     public static String buildUrlForMovies(String sort) {
         /*
          * sort should be either popular or top_rated
@@ -20,7 +18,7 @@ public class UrlBuilderTools {
                 .appendPath("3")
                 .appendPath("movie")
                 .appendPath(sort)
-                .appendQueryParameter("api_key", MOVIE_DB_API_KEY);
+                .appendQueryParameter("api_key", Const.MOVIE_DB_API_KEY);
         return builder.build().toString();
     }
 
@@ -36,7 +34,7 @@ public class UrlBuilderTools {
                 .appendPath("3")
                 .appendPath("movie")
                 .appendPath(movieId)
-                .appendQueryParameter("api_key", MOVIE_DB_API_KEY);
+                .appendQueryParameter("api_key", Const.MOVIE_DB_API_KEY);
         return builder.build().toString();
     }
 }

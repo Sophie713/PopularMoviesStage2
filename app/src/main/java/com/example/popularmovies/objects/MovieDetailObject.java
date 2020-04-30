@@ -10,6 +10,14 @@ public class MovieDetailObject implements Parcelable {
     private String plot = "";
     private String voteAverage = "";
 
+    /**
+     * Parcelable Movie detail with main information
+     * @param posterUrl
+     * @param title
+     * @param releaseDate
+     * @param plot
+     * @param voteAverage
+     */
     public MovieDetailObject(String posterUrl, String title, String releaseDate, String plot, String voteAverage) {
         if (plot != null)
             this.plot = plot;

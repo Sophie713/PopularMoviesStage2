@@ -1,15 +1,19 @@
 package com.example.popularmovies;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 
 import com.example.popularmovies.adapter.AdapterMovies;
 import com.example.popularmovies.databinding.ActivityMainBinding;
+import com.example.popularmovies.objects.MoviePosterObject;
 import com.example.popularmovies.utils.Const;
 import com.example.popularmovies.utils.GeneralUtils;
 import com.example.popularmovies.utils.NetworkUtils;
@@ -17,12 +21,15 @@ import com.example.popularmovies.utils.ParserUtil;
 import com.example.popularmovies.utils.UrlBuilderTools;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements GeneralUtils.ResponseReciever {
 
+    private static final String SAVED_STATE = "state";
     private ActivityMainBinding binding;
 
     private String currentSort = Const.POPULAR_SORT;
+    private ArrayList<MoviePosterObject> moviePosterObjectArrayList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // set up spinner
         binding.activityMainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -46,15 +54,29 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
-
             }
         });
 
-        loadMovies();
-
+        //set layout manager to recyclerview
         binding.activityMainRecView.setLayoutManager(new GridLayoutManager(this, getNumberOfColumns()));
+
+        //is I have saved instance I use it else I load movies
+        if (savedInstanceState == null) {
+            loadMovies();
+        } else {
+            try {
+                moviePosterObjectArrayList = savedInstanceState.getParcelableArrayList(SAVED_STATE);
+                binding.activityMainRecView.setAdapter(new AdapterMovies(moviePosterObjectArrayList, this));
+            } catch (Exception unexpected) {
+                loadMovies();
+                Log.e(Const.MAIN_ACTIVITY, unexpected.getMessage());
+            }
+        }
     }
 
+    /**
+     * load movies start ; show loading spinner
+     */
     private void loadMovies() {
         if (GeneralUtils.isOnline(this)) {
             try {
@@ -68,7 +90,11 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
         }
     }
 
-
+    /**
+     * set number of columns based on screen size
+     *
+     * @return number of columns
+     */
     private int getNumberOfColumns() {
         int columns = 1;
         // make a grid with a certain number of columns
@@ -89,13 +115,30 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
         return columns;
     }
 
+    /**
+     * server response - parse and display the data in the recyler view ; hide loading spinner
+     *
+     * @param response
+     */
     @Override
     public void responseRecieved(String response) {
         if (response != Const.message_error) {
-            binding.activityMainRecView.setAdapter(new AdapterMovies(ParserUtil.moviePosterObjects(response), this));
+            moviePosterObjectArrayList = ParserUtil.moviePosterObjects(response);
+            binding.activityMainRecView.setAdapter(new AdapterMovies(moviePosterObjectArrayList, this));
             binding.activityMainProgressBar.setVisibility(View.GONE);
         } else {
             GeneralUtils.someProblemToast(this);
         }
+    }
+
+    /**
+     * save the data if we already have it
+     * @param outState
+     */
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (moviePosterObjectArrayList != null)
+            outState.putParcelableArrayList(SAVED_STATE, moviePosterObjectArrayList);
     }
 }
