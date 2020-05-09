@@ -6,8 +6,12 @@
     <string name="vote_average">Vote Average:</string>
     <string name="release_date">Release Date:</string>
     <string name="uknown">Unknown</string>
+    <string name="error_videos_reviews_message">There has been some error. Couldn\'t load videos and reviews.</string>
+    <string name="trailer">Trailer %d</string>
+    <string name="no_favorite_movies">No favorite movies found.</string>
     <string-array name="spinner_sort">
-        <item>Sort by Popularity</item>
-        <item>Sort by Rating</item>
+        <item>My Favorites</item>
+        <item>Most Popular</item>
+        <item>Best Rated</item>
     </string-array>
 </resources>

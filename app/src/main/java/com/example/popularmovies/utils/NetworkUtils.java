@@ -14,7 +14,7 @@ public class NetworkUtils {
      * @param url recieves URL it should get the response from
      * @param responseReciever interface to pass the data do the activity
      */
-    public static void getServerResponse(URL url, final GeneralUtils.ResponseReciever responseReciever) {
+    public static void getServerResponse(URL url, final GeneralUtils.ResponseReciever responseReciever, final int taskID) {
         new AsyncTask<URL, Void, String>() {
             String response = "";
 
@@ -24,14 +24,14 @@ public class NetworkUtils {
                 try {
                     response = getJson(url);
                 } catch (Exception e) {
-                    responseReciever.responseRecieved(Const.message_error);
+                    responseReciever.responseRecieved(Const.message_error, taskID);
                 }
                 return response;
             }
 
             @Override
             protected void onPostExecute(String s) {
-                responseReciever.responseRecieved(response);
+                responseReciever.responseRecieved(response, taskID);
                 super.onPostExecute(s);
             }
         }.execute(url);

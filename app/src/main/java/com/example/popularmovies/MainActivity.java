@@ -2,10 +2,11 @@ package com.example.popularmovies;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.GridLayoutManager;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
@@ -13,23 +14,28 @@ import android.widget.AdapterView;
 
 import com.example.popularmovies.adapter.AdapterMovies;
 import com.example.popularmovies.databinding.ActivityMainBinding;
+import com.example.popularmovies.objects.MovieDetailObject;
 import com.example.popularmovies.objects.MoviePosterObject;
 import com.example.popularmovies.utils.Const;
 import com.example.popularmovies.utils.GeneralUtils;
 import com.example.popularmovies.utils.NetworkUtils;
 import com.example.popularmovies.utils.ParserUtil;
 import com.example.popularmovies.utils.UrlBuilderTools;
+import com.example.popularmovies.viewmodels.MainViewModel;
 
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements GeneralUtils.ResponseReciever {
 
     private static final String SAVED_STATE = "state";
-    private ActivityMainBinding binding;
+    private int firstRun = 0;
 
-    private String currentSort = Const.POPULAR_SORT;
-    private ArrayList<MoviePosterObject> moviePosterObjectArrayList;
+    private ActivityMainBinding binding;
+    private AdapterMovies moviesAdapter;
+    private ArrayList<MoviePosterObject> moviePosterObjectArrayList = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,19 +43,32 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        //set layout manager to recyclerview
+        binding.activityMainRecView.setLayoutManager(new GridLayoutManager(this, getNumberOfColumns()));
+        moviesAdapter = new AdapterMovies(moviePosterObjectArrayList, this);
+        binding.activityMainRecView.setAdapter(moviesAdapter);
+
         // set up spinner
         binding.activityMainSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                switch (position) {
-                    case 0:
-                        currentSort = Const.POPULAR_SORT;
-                        break;
-                    case 1:
-                        currentSort = Const.TOP_SORT;
-                        break;
+                firstRun++;
+                if (firstRun > 1) {
+                    switch (position) {
+                        case 0:
+                            Const.currentSort = Const.FAVORITE;
+                            loadMoviesFromDatabase();
+                            break;
+                        case 1:
+                            Const.currentSort = Const.POPULAR_SORT;
+                            loadMovies();
+                            break;
+                        case 2:
+                            Const.currentSort = Const.TOP_SORT;
+                            loadMovies();
+                            break;
+                    }
                 }
-                loadMovies();
             }
 
             @Override
@@ -57,21 +76,63 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
             }
         });
 
-        //set layout manager to recyclerview
-        binding.activityMainRecView.setLayoutManager(new GridLayoutManager(this, getNumberOfColumns()));
 
         //is I have saved instance I use it else I load movies
         if (savedInstanceState == null) {
-            loadMovies();
+            //load data based on preference
+            if (Const.currentSort.equals(Const.FAVORITE)) {
+                loadMoviesFromDatabase();
+            } else {
+                loadMovies();
+            }
+
         } else {
             try {
+                //get the movies from saved instance
                 moviePosterObjectArrayList = savedInstanceState.getParcelableArrayList(SAVED_STATE);
-                binding.activityMainRecView.setAdapter(new AdapterMovies(moviePosterObjectArrayList, this));
+                updateAdapterData();
             } catch (Exception unexpected) {
-                loadMovies();
-                Log.e(Const.MAIN_ACTIVITY, unexpected.getMessage());
+                //in case of an error load them again
+                if (Const.currentSort.equals(Const.FAVORITE))
+                    loadMoviesFromDatabase();
+                else
+                    loadMovies();
+                Log.e(Const.MAIN_ACTIVITY, "" + unexpected.getMessage());
             }
         }
+    }
+
+    private void loadMoviesFromDatabase() {
+        binding.activityMainProgressBar.setVisibility(View.VISIBLE);
+        moviePosterObjectArrayList.clear();
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
+        mainViewModel.getAllMovies().observe(MainActivity.this, new Observer<List<MovieDetailObject>>() {
+            @Override
+            public void onChanged(List<MovieDetailObject> movieDetailObjects) {
+                if (Const.currentSort.equals(Const.FAVORITE)) {
+                    if (movieDetailObjects.size() > 0) {
+                        moviePosterObjectArrayList.clear();
+                        for (int i = 0; i < movieDetailObjects.size(); i++) {
+                            moviePosterObjectArrayList.add(new MoviePosterObject(movieDetailObjects.get(i).getPosterUrl(), movieDetailObjects.get(i).getMovieId()));
+                            updateAdapterData();
+                        }
+                    } else {
+                        GeneralUtils.noFavoriteMoviesToast(MainActivity.this);
+                    }
+                }
+            }
+        });
+        binding.activityMainProgressBar.setVisibility(View.GONE);
+    }
+
+    private void updateAdapterData() {
+        moviesAdapter.insertNewData(moviePosterObjectArrayList);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                moviesAdapter.notifyDataSetChanged();
+            }
+        });
     }
 
     /**
@@ -81,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
         if (GeneralUtils.isOnline(this)) {
             try {
                 binding.activityMainProgressBar.setVisibility(View.VISIBLE);
-                NetworkUtils.getServerResponse(new URL(UrlBuilderTools.buildUrlForMovies(currentSort)), this);
+                NetworkUtils.getServerResponse(new URL(UrlBuilderTools.buildUrlForMovies(Const.currentSort)), this, Const.MOVIE_POSTER_ID);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -119,20 +180,23 @@ public class MainActivity extends AppCompatActivity implements GeneralUtils.Resp
      * server response - parse and display the data in the recyler view ; hide loading spinner
      *
      * @param response
+     * @param taskId
      */
     @Override
-    public void responseRecieved(String response) {
-        if (response != Const.message_error) {
+    public void responseRecieved(String response, int taskId) {
+        if (!response.equals(Const.message_error) && taskId == Const.MOVIE_POSTER_ID) {
             moviePosterObjectArrayList = ParserUtil.moviePosterObjects(response);
-            binding.activityMainRecView.setAdapter(new AdapterMovies(moviePosterObjectArrayList, this));
-            binding.activityMainProgressBar.setVisibility(View.GONE);
         } else {
+            moviePosterObjectArrayList.clear();
             GeneralUtils.someProblemToast(this);
         }
+        binding.activityMainProgressBar.setVisibility(View.GONE);
+        updateAdapterData();
     }
 
     /**
      * save the data if we already have it
+     *
      * @param outState
      */
     @Override

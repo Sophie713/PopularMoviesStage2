@@ -1,6 +1,5 @@
 package com.example.popularmovies.holder;
 
-import android.media.Image;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -9,7 +8,6 @@ import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.popularmovies.R;
-import com.squareup.picasso.Picasso;
 
 public class HolderMovie extends RecyclerView.ViewHolder {
 

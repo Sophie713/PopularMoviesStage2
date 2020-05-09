@@ -9,7 +9,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.popularmovies.MovieDetail;
+import com.example.popularmovies.MovieDetailActivity;
 import com.example.popularmovies.R;
 import com.example.popularmovies.holder.HolderMovie;
 import com.example.popularmovies.objects.MoviePosterObject;
@@ -22,11 +22,12 @@ import java.util.ArrayList;
 
 public class AdapterMovies extends RecyclerView.Adapter<HolderMovie> {
 
-    private final ArrayList<MoviePosterObject> movies;
+    private ArrayList<MoviePosterObject> movies = new ArrayList<>();
     private Context context;
 
     public AdapterMovies(ArrayList<MoviePosterObject> movies, Context context) {
-        this.movies = movies;
+        this.movies.clear();
+        this.movies.addAll(movies);
         this.context = context;
     }
 
@@ -45,8 +46,8 @@ public class AdapterMovies extends RecyclerView.Adapter<HolderMovie> {
             @Override
             public void onClick(View v) {
                 //check I am online to download data
-                if (GeneralUtils.isOnline(context)) {
-                    Intent intent = new Intent(context, MovieDetail.class);
+                if (GeneralUtils.isOnline(context)||Const.currentSort.equals(Const.FAVORITE)) {
+                    Intent intent = new Intent(context, MovieDetailActivity.class);
                     //pass movie id as an identifier so that I can download the movie details
                     intent.putExtra(Const.movieId, movies.get(positionF).getMovieId());
                     context.startActivity(intent);
@@ -63,5 +64,9 @@ public class AdapterMovies extends RecyclerView.Adapter<HolderMovie> {
     @Override
     public int getItemCount() {
         return movies.size();
+    }
+
+    public void insertNewData(ArrayList<MoviePosterObject> newMovies){
+        this.movies = newMovies;
     }
 }

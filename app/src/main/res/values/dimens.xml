@@ -2,4 +2,6 @@
 <resources>
     <dimen name="main_side_padding">16dp</dimen>
     <dimen name="dp5">5dp</dimen>
+    <dimen name="dp45">45dp</dimen>
+    <dimen name="dp16">16dp</dimen>
 </resources>

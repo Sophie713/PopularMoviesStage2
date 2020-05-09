@@ -43,9 +43,18 @@ public class GeneralUtils {
     }
 
     /**
+     * toast message for no favorite movies in the database
+     * @param context
+     */
+    public static void noFavoriteMoviesToast(Context context) {
+        Toast.makeText(context, R.string.no_favorite_movies, Toast.LENGTH_LONG).show();
+
+    }
+
+    /**
      * interface to recieve asynchronous data
      */
     public interface ResponseReciever {
-        public void responseRecieved(String response);
+        void responseRecieved(String response, int taskId);
     }
 }
