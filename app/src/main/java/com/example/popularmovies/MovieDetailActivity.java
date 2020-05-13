@@ -222,6 +222,7 @@ public class MovieDetailActivity extends AppCompatActivity implements GeneralUti
                         detailVidRevAdapter.notifyDataSetChanged();
                     }
                 });
+                break;
             }
         }
     }
